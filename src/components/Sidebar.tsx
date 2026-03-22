@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Image, PenLine, CalendarDays, MessageSquare, Wifi, WifiOff } from 'lucide-react';
+import { Image, PenLine, CalendarDays, MessageSquare } from 'lucide-react';
 import type { PanelId } from '../types';
 import { pingPostiz } from '../lib/postiz';
 import { isConfigured } from '../config';
@@ -49,15 +49,13 @@ export function Sidebar({ activePanel, onNavigate }: SidebarProps) {
           </span>
           <span
             style={{
-              fontSize: '10px',
-              fontWeight: 600,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase' as const,
+              fontSize: '13px',
               color: 'var(--studio-ink-4)',
-              marginBottom: '2px',
+              marginBottom: '1px',
+              lineHeight: 1,
             }}
           >
-            by you
+            ↗
           </span>
         </div>
       </div>
@@ -79,17 +77,18 @@ export function Sidebar({ activePanel, onNavigate }: SidebarProps) {
               style={{
                 padding: '10px 12px',
                 backgroundColor: active ? 'var(--studio-panel)' : 'transparent',
-                boxShadow: active ? '0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)' : 'none',
+                border: active ? '1px solid var(--studio-border)' : '1px solid transparent',
+                boxShadow: active ? '0 1px 3px rgba(0,0,0,0.12)' : 'none',
               }}
             >
               <div className="flex items-center gap-3">
                 <div
                   style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 7,
+                    width: 26,
+                    height: 26,
+                    borderRadius: 6,
                     backgroundColor: active ? 'var(--studio-ink)' : 'transparent',
-                    border: active ? 'none' : '1px solid var(--studio-border)',
+                    border: active ? 'none' : '1px solid var(--studio-border-light)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -98,7 +97,7 @@ export function Sidebar({ activePanel, onNavigate }: SidebarProps) {
                   }}
                 >
                   <Icon
-                    size={13}
+                    size={12}
                     color={active ? '#ffffff' : 'var(--studio-ink-3)'}
                     strokeWidth={active ? 2 : 1.5}
                   />
@@ -106,9 +105,9 @@ export function Sidebar({ activePanel, onNavigate }: SidebarProps) {
                 <div>
                   <div
                     style={{
-                      fontSize: '13px',
+                      fontSize: '12px',
                       fontWeight: active ? 600 : 400,
-                      color: active ? 'var(--studio-ink)' : 'var(--studio-ink-2)',
+                      color: active ? 'var(--studio-ink)' : '#888',
                       lineHeight: 1.2,
                     }}
                   >
@@ -116,7 +115,7 @@ export function Sidebar({ activePanel, onNavigate }: SidebarProps) {
                   </div>
                   <div
                     style={{
-                      fontSize: '11px',
+                      fontSize: '10px',
                       color: active ? 'var(--studio-ink-3)' : 'var(--studio-ink-4)',
                       marginTop: 1,
                     }}
@@ -130,21 +129,43 @@ export function Sidebar({ activePanel, onNavigate }: SidebarProps) {
         })}
       </nav>
 
-      {/* Footer */}
+      {/* Footer — status widget */}
       <div
         className="mx-3 mb-5 rounded-lg px-3 py-3"
         style={{
-          backgroundColor: connected ? '#f0fdf4' : connected === false ? '#fef2f2' : 'transparent',
-          border: connected === null ? 'none' : `1px solid ${connected ? '#bbf7d0' : '#fecaca'}`,
+          backgroundColor: 'var(--studio-panel)',
+          border: '1px solid var(--studio-border)',
         }}
       >
         <div className="flex items-center gap-2">
           {connected === null ? (
-            <div className="w-1.5 h-1.5 rounded-full bg-stone-300 animate-pulse" />
+            <div
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                backgroundColor: 'var(--studio-border-light)',
+              }}
+            />
           ) : connected ? (
-            <Wifi size={12} color="#16a34a" />
+            <div
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                backgroundColor: '#22c55e',
+                boxShadow: '0 0 0 2px rgba(34,197,94,0.2)',
+              }}
+            />
           ) : (
-            <WifiOff size={12} color="#dc2626" />
+            <div
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                backgroundColor: '#ef4444',
+              }}
+            />
           )}
           <span
             style={{
@@ -157,7 +178,7 @@ export function Sidebar({ activePanel, onNavigate }: SidebarProps) {
           </span>
         </div>
         {!connected && connected !== null && (
-          <p style={{ fontSize: '10px', color: '#ef4444', marginTop: 4, lineHeight: 1.4 }}>
+          <p style={{ fontSize: '10px', color: 'var(--studio-ink-3)', marginTop: 4, lineHeight: 1.4 }}>
             Set VITE_POSTIZ_URL in .env
           </p>
         )}

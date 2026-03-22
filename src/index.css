@@ -37,17 +37,18 @@
   }
 }
 
-/* Studio design tokens */
+/* Studio design tokens — Sample A: Crisp Ink on Warm Light */
 :root {
   --studio-bg: #faf8f5;
-  --studio-sidebar: #f4f1ec;
-  --studio-sidebar-border: #e8e3db;
+  --studio-sidebar: #f7f5f1;
+  --studio-sidebar-border: #1a1a18;
   --studio-panel: #ffffff;
-  --studio-border: #e8e4de;
+  --studio-border: #1a1a18;
+  --studio-border-light: #e0ddd8;
   --studio-ink: #0f0f0d;
   --studio-ink-2: #3a3834;
   --studio-ink-3: #8a847c;
-  --studio-ink-4: #bab5ad;
+  --studio-ink-4: #c0bbb4;
   --studio-accent: #c9f264;
   --studio-serif: 'Instrument Serif', Georgia, serif;
   --studio-sans: 'Geist', system-ui, sans-serif;
@@ -56,7 +57,7 @@
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--studio-border); border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: var(--studio-border-light); border-radius: 99px; }
 
 /* Focus styles */
 *:focus-visible {
@@ -98,15 +99,16 @@ button, a {
 /* Eyebrow label */
 .eyebrow {
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--studio-ink-4);
 }
 
-/* Studio divider */
+/* Studio divider — ink at low opacity for crisp-but-subtle separation */
 .studio-divider {
   border: none;
   border-top: 1px solid var(--studio-border);
+  opacity: 0.12;
   margin: 24px 0;
 }

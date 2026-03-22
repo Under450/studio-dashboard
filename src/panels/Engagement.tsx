@@ -124,7 +124,7 @@ export function EngagementPanel() {
                   <div style={{
                     padding: '10px 14px',
                     backgroundColor: 'var(--studio-sidebar)',
-                    borderBottom: '1px solid var(--studio-border)',
+                    borderBottom: '1px solid var(--studio-border-light)',
                   }}>
                     <p style={{ fontSize: '12px', color: 'var(--studio-ink-3)', fontStyle: 'italic', lineHeight: 1.5 }}>
                       "{r.comment}"
@@ -140,7 +140,7 @@ export function EngagementPanel() {
                       style={{
                         flexShrink: 0,
                         padding: '5px 8px',
-                        border: '1px solid var(--studio-border)',
+                        border: '1px solid var(--studio-border-light)',
                         borderRadius: 6,
                         backgroundColor: r.copied ? '#f0fdf4' : 'var(--studio-panel)',
                         cursor: 'pointer',

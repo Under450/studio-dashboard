@@ -56,7 +56,7 @@ export function SchedulePanel() {
     width: '100%',
     padding: '9px 12px',
     border: '1px solid var(--studio-border)',
-    borderRadius: 8,
+    borderRadius: 7,
     fontSize: '13px',
     color: 'var(--studio-ink)',
     backgroundColor: 'var(--studio-panel)',
@@ -118,7 +118,7 @@ export function SchedulePanel() {
               <RefreshCw size={13} />
             </button>
           </div>
-          <div style={{ border: '1px solid var(--studio-border)', borderRadius: 12, overflow: 'hidden' }}>
+          <div style={{ border: '1px solid var(--studio-border)', borderRadius: 10, overflow: 'hidden' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', backgroundColor: 'var(--studio-sidebar)', borderBottom: '1px solid var(--studio-border)' }}>
               {weekDays.map((day) => (
                 <div key={day.toISOString()} style={{ padding: '10px 8px', textAlign: 'center' as const }}>
@@ -141,9 +141,9 @@ export function SchedulePanel() {
                     onClick={() => setSelectedDate(day)}
                     style={{
                       padding: 8,
-                      borderRight: '1px solid var(--studio-border)',
+                      borderRight: '1px solid var(--studio-border-light)',
                       cursor: 'pointer',
-                      backgroundColor: isSelected ? '#f5fef0' : 'transparent',
+                      backgroundColor: isSelected ? '#f7f5f1' : 'transparent',
                       transition: 'background 0.1s',
                     }}
                   >

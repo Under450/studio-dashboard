@@ -80,7 +80,7 @@ export function CreateImagePanel() {
                 gap: 8,
                 padding: '6px 12px',
                 backgroundColor: 'var(--studio-sidebar)',
-                border: '1px solid var(--studio-border)',
+                border: '1px solid var(--studio-border-light)',
                 borderRadius: 6,
               }}
             >
@@ -200,7 +200,7 @@ export function CreateImagePanel() {
                 justifyContent: 'center',
                 minHeight: 220,
                 borderRadius: 12,
-                border: `2px dashed ${dragging ? 'var(--studio-ink)' : 'var(--studio-border)'}`,
+                border: `2px dashed ${dragging ? 'var(--studio-ink)' : 'var(--studio-border-light)'}`,
                 backgroundColor: dragging ? 'var(--studio-sidebar)' : '#fdfcfa',
                 cursor: 'pointer',
                 transition: 'all 0.15s',
@@ -218,7 +218,7 @@ export function CreateImagePanel() {
                   height: 44,
                   borderRadius: 10,
                   backgroundColor: 'var(--studio-sidebar)',
-                  border: '1px solid var(--studio-border)',
+                  border: '1px solid var(--studio-border-light)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

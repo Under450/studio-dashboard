@@ -38,7 +38,7 @@ export function FieldLabel({ children }: { children: ReactNode }) {
   );
 }
 
-/* Reusable primary button */
+/* Primary button — ink fill with ink border */
 export function PrimaryButton({
   children,
   onClick,
@@ -58,17 +58,17 @@ export function PrimaryButton({
         display: 'inline-flex',
         alignItems: 'center',
         gap: 8,
-        padding: '10px 20px',
+        padding: '9px 18px',
         backgroundColor: disabled ? 'var(--studio-ink-4)' : 'var(--studio-ink)',
         color: '#ffffff',
-        border: 'none',
-        borderRadius: 8,
-        fontSize: '13px',
+        border: `1px solid ${disabled ? 'transparent' : 'var(--studio-border)'}`,
+        borderRadius: 7,
+        fontSize: '12px',
         fontWeight: 600,
         cursor: disabled ? 'not-allowed' : 'pointer',
         letterSpacing: '-0.01em',
         transition: 'all 0.15s',
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 0.45 : 1,
         fontFamily: 'var(--studio-sans)',
       }}
       onMouseEnter={(e) => { if (!disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#2a2a2a'; }}
@@ -80,7 +80,7 @@ export function PrimaryButton({
   );
 }
 
-/* Ghost button */
+/* Ghost button — white with ink border */
 export function GhostButton({
   children,
   onClick,
@@ -100,20 +100,20 @@ export function GhostButton({
         display: 'inline-flex',
         alignItems: 'center',
         gap: 8,
-        padding: '10px 20px',
-        backgroundColor: 'transparent',
+        padding: '9px 18px',
+        backgroundColor: 'var(--studio-panel)',
         color: 'var(--studio-ink-2)',
         border: '1px solid var(--studio-border)',
-        borderRadius: 8,
-        fontSize: '13px',
+        borderRadius: 7,
+        fontSize: '12px',
         fontWeight: 500,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 0.45 : 1,
         letterSpacing: '-0.01em',
         fontFamily: 'var(--studio-sans)',
       }}
       onMouseEnter={(e) => { if (!disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'var(--studio-sidebar)'; }}
-      onMouseLeave={(e) => { if (!disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent'; }}
+      onMouseLeave={(e) => { if (!disabled) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'var(--studio-panel)'; }}
     >
       {icon}
       {children}

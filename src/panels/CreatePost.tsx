@@ -125,13 +125,14 @@ export function CreatePostPanel() {
                   padding: '6px 12px',
                   border: '1px solid var(--studio-border)',
                   borderRadius: 7,
-                  fontSize: '12px',
-                  fontWeight: 500,
+                  fontSize: '11px',
+                  fontWeight: 600,
                   color: 'var(--studio-ink-2)',
                   backgroundColor: 'var(--studio-panel)',
                   cursor: loadingHashtags || !caption.trim() || !isConfigured.claude ? 'not-allowed' : 'pointer',
                   opacity: loadingHashtags || !caption.trim() || !isConfigured.claude ? 0.45 : 1,
                   fontFamily: 'var(--studio-sans)',
+                  letterSpacing: '-0.01em',
                 }}
               >
                 <Sparkles size={12} />
@@ -151,7 +152,7 @@ export function CreatePostPanel() {
                       alignItems: 'center',
                       gap: 5,
                       padding: '5px 10px',
-                      border: '1px solid var(--studio-border)',
+                      border: '1px solid var(--studio-border-light)',
                       borderRadius: 6,
                       fontSize: '12px',
                       color: 'var(--studio-ink-2)',
