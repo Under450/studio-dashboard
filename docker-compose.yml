@@ -1,0 +1,15 @@
+services:
+  studio:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - VITE_POSTIZ_URL=http://postiz:3000
+      - VITE_POSTIZ_API_KEY=${VITE_POSTIZ_API_KEY}
+      - VITE_CLAUDE_API_KEY=${VITE_CLAUDE_API_KEY}
+      - VITE_CANVA_CLIENT_ID=${VITE_CANVA_CLIENT_ID}
+    depends_on:
+      - postiz
+
+  # Add your Postiz service config here
+  # See https://docs.postiz.com/installation for the full Postiz docker-compose
