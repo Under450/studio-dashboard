@@ -24,10 +24,23 @@ export interface PostizChannel {
   avatar?: string;
 }
 
+export interface Account {
+  id: string;
+  name: string;
+  postizUrl: string;
+  postizApiKey: string;
+  claudeApiKey: string;
+  createdAt: number;
+}
+
 export interface AppContextType {
   currentPost: PostDraft;
   setCurrentPost: (post: PostDraft) => void;
   activePanel: PanelId;
   setActivePanel: (panel: PanelId) => void;
   postizConnected: boolean;
+  activeAccount: Account | null;
+  accounts: Account[];
+  setActiveAccount: (account: Account) => void;
+  openAccountManager: () => void;
 }
