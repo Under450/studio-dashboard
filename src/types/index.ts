@@ -1,4 +1,5 @@
 export type Platform = 'instagram-post' | 'instagram-story' | 'linkedin' | 'twitter' | 'tiktok' | 'facebook';
+export type PanelId = 'create-image' | 'create-post' | 'schedule' | 'engagement';
 
 export interface PostDraft {
   caption: string;
@@ -26,6 +27,7 @@ export interface PostizChannel {
 export interface AppContextType {
   currentPost: PostDraft;
   setCurrentPost: (post: PostDraft) => void;
-  activePanel: string;
-  setActivePanel: (panel: string) => void;
+  activePanel: PanelId;
+  setActivePanel: (panel: PanelId) => void;
+  postizConnected: boolean;
 }
