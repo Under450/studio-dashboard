@@ -25,35 +25,88 @@
     --ring: 0 0% 3.9%;
     --radius: 0.5rem;
   }
-
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-  }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Geist', 'system-ui', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Studio design tokens */
+:root {
+  --studio-bg: #faf8f5;
+  --studio-sidebar: #f4f1ec;
+  --studio-sidebar-border: #e8e3db;
+  --studio-panel: #ffffff;
+  --studio-border: #e8e4de;
+  --studio-ink: #0f0f0d;
+  --studio-ink-2: #3a3834;
+  --studio-ink-3: #8a847c;
+  --studio-ink-4: #bab5ad;
+  --studio-accent: #c9f264;
+  --studio-serif: 'Instrument Serif', Georgia, serif;
+  --studio-sans: 'Geist', system-ui, sans-serif;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--studio-border); border-radius: 99px; }
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--studio-ink);
+  outline-offset: 2px;
+}
+
+/* Input refinement */
+input[type="date"], input[type="time"] {
+  color-scheme: light;
+}
+
+/* Textarea refinement */
+textarea {
+  resize: none;
+}
+
+/* Selection */
+::selection {
+  background: #f0ead0;
+  color: var(--studio-ink);
+}
+
+/* Smooth transitions */
+button, a {
+  transition: all 0.15s ease;
+}
+
+/* Panel heading serif style */
+.panel-title {
+  font-family: var(--studio-serif);
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--studio-ink);
+  line-height: 1.1;
+}
+
+/* Eyebrow label */
+.eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--studio-ink-4);
+}
+
+/* Studio divider */
+.studio-divider {
+  border: none;
+  border-top: 1px solid var(--studio-border);
+  margin: 24px 0;
 }

@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
 import { Sparkles, X, ArrowRight, Save } from 'lucide-react';
-import { PanelShell } from '../components/PanelShell';
+import { PanelShell, FieldLabel, PrimaryButton, GhostButton } from '../components/PanelShell';
 import { generateHashtags } from '../lib/claude';
 import type { Platform } from '../types';
 import { AppContext } from '../App';
@@ -32,147 +32,243 @@ export function CreatePostPanel() {
   const platforms = currentPost.platforms;
   const hashtags = currentPost.hashtags;
 
-  const setCaption = (caption: string) => setCurrentPost({ ...currentPost, caption });
-  const setPlatforms = (platforms: Platform[]) => setCurrentPost({ ...currentPost, platforms });
-  const setHashtags = (hashtags: string[]) => setCurrentPost({ ...currentPost, hashtags });
+  const setCaption = (c: string) => setCurrentPost({ ...currentPost, caption: c });
+  const setPlatforms = (p: Platform[]) => setCurrentPost({ ...currentPost, platforms: p });
+  const setHashtags = (h: string[]) => setCurrentPost({ ...currentPost, hashtags: h });
 
   const primaryLimit = platforms.length > 0
     ? Math.min(...platforms.map((p) => PLATFORM_LIMITS[p] ?? 9999))
     : 9999;
   const pct = primaryLimit < 9999 ? (caption.length / primaryLimit) * 100 : 0;
-  const counterColor = pct >= 100 ? '#ef4444' : pct >= 80 ? '#f59e0b' : '#a1a1aa';
+  const counterColor = pct >= 100 ? '#ef4444' : pct >= 80 ? '#f59e0b' : 'var(--studio-ink-4)';
 
-  const togglePlatform = (p: Platform) => {
+  const togglePlatform = (p: Platform) =>
     setPlatforms(platforms.includes(p) ? platforms.filter((x) => x !== p) : [...platforms, p]);
-  };
 
   const handleGenerateHashtags = async () => {
     if (!caption.trim()) return;
     setLoadingHashtags(true);
     setHashtagError('');
     try {
-      const tags = await generateHashtags(caption, platforms.map((p) => p));
+      const tags = await generateHashtags(caption, platforms);
       setHashtags(tags);
-    } catch (e) {
-      setHashtagError('Could not generate hashtags — check your Claude API key in .env');
+    } catch {
+      setHashtagError('Could not generate — check your Claude API key in .env');
     } finally {
       setLoadingHashtags(false);
     }
   };
 
-  const removeHashtag = (tag: string) => setHashtags(hashtags.filter((h) => h !== tag));
-
   return (
-    <PanelShell title="Create Post" subtitle="Write your caption, pick platforms, generate hashtags.">
-      <div className="flex gap-8 h-full">
-        {/* Left — caption */}
-        <div className="flex-1 flex flex-col gap-6">
+    <PanelShell
+      eyebrow="Step 2 of 4"
+      title="Create Post"
+      subtitle="Write your caption, choose platforms, and let AI generate the right hashtag mix."
+    >
+      <div className="flex gap-10">
+        {/* Left — caption + hashtags */}
+        <div className="flex-1 space-y-7">
+          {/* Caption */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#a1a1aa] mb-3">Caption</p>
-            <textarea
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              placeholder="Write your caption here…"
-              className="w-full border border-[#e4e4e7] rounded-md p-4 text-sm text-[#0a0a0a] resize-none focus:outline-none focus:border-[#0a0a0a] transition-colors leading-relaxed"
-              style={{ minHeight: 200, backgroundColor: '#ffffff', fontFamily: 'inherit' }}
-            />
-            {platforms.length > 0 && primaryLimit < 9999 && (
-              <div className="flex justify-end mt-1.5">
-                <span className="text-xs font-medium" style={{ color: counterColor }}>
-                  {caption.length} / {primaryLimit}
+            <FieldLabel>Caption</FieldLabel>
+            <div style={{ position: 'relative' }}>
+              <textarea
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                placeholder="Write something worth stopping the scroll…"
+                style={{
+                  width: '100%',
+                  minHeight: 180,
+                  padding: '16px',
+                  border: '1px solid var(--studio-border)',
+                  borderRadius: 10,
+                  fontSize: '14px',
+                  lineHeight: 1.65,
+                  color: 'var(--studio-ink)',
+                  backgroundColor: 'var(--studio-panel)',
+                  fontFamily: 'var(--studio-sans)',
+                  outline: 'none',
+                  transition: 'border-color 0.15s',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = 'var(--studio-ink)')}
+                onBlur={(e) => (e.target.style.borderColor = 'var(--studio-border)')}
+              />
+              {platforms.length > 0 && primaryLimit < 9999 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    bottom: 10,
+                    right: 12,
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: counterColor,
+                  }}
+                >
+                  {caption.length}/{primaryLimit}
                 </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Hashtags */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#a1a1aa]">Hashtags</p>
+              <FieldLabel>Hashtags</FieldLabel>
               <button
                 onClick={handleGenerateHashtags}
                 disabled={loadingHashtags || !caption.trim() || !isConfigured.claude}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-md transition-all duration-150 disabled:opacity-40"
-                style={{ borderColor: '#e4e4e7', color: '#0a0a0a', backgroundColor: '#ffffff' }}
                 title={!isConfigured.claude ? 'Add VITE_CLAUDE_API_KEY to .env' : ''}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 12px',
+                  border: '1px solid var(--studio-border)',
+                  borderRadius: 7,
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  color: 'var(--studio-ink-2)',
+                  backgroundColor: 'var(--studio-panel)',
+                  cursor: loadingHashtags || !caption.trim() || !isConfigured.claude ? 'not-allowed' : 'pointer',
+                  opacity: loadingHashtags || !caption.trim() || !isConfigured.claude ? 0.45 : 1,
+                  fontFamily: 'var(--studio-sans)',
+                }}
               >
                 <Sparkles size={12} />
-                {loadingHashtags ? 'Generating…' : 'Generate Hashtags'}
+                {loadingHashtags ? 'Generating…' : 'Generate with AI'}
               </button>
             </div>
-            {hashtagError && <p className="text-xs text-red-500 mb-2">{hashtagError}</p>}
+            {hashtagError && (
+              <p style={{ fontSize: '12px', color: '#ef4444', marginBottom: 8 }}>{hashtagError}</p>
+            )}
             {hashtags.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
+              <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6 }}>
                 {hashtags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md border"
-                    style={{ borderColor: '#e4e4e7', backgroundColor: '#f4f4f5', color: '#3f3f46' }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      padding: '5px 10px',
+                      border: '1px solid var(--studio-border)',
+                      borderRadius: 6,
+                      fontSize: '12px',
+                      color: 'var(--studio-ink-2)',
+                      backgroundColor: 'var(--studio-sidebar)',
+                      fontWeight: 400,
+                    }}
                   >
                     #{tag}
-                    <button onClick={() => removeHashtag(tag)} className="hover:text-red-400 transition-colors">
+                    <button
+                      onClick={() => setHashtags(hashtags.filter((h) => h !== tag))}
+                      style={{ cursor: 'pointer', display: 'flex', opacity: 0.5 }}
+                    >
                       <X size={10} />
                     </button>
                   </span>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-[#a1a1aa]">
-                {isConfigured.claude ? 'Write a caption first, then generate hashtags.' : 'Add VITE_CLAUDE_API_KEY to .env to enable hashtag generation.'}
-              </p>
+              <div
+                style={{
+                  padding: '14px 16px',
+                  border: '1px dashed var(--studio-border)',
+                  borderRadius: 10,
+                  backgroundColor: '#fdfcfa',
+                }}
+              >
+                <p style={{ fontSize: '13px', color: 'var(--studio-ink-4)' }}>
+                  {isConfigured.claude
+                    ? 'Write a caption first, then click Generate with AI.'
+                    : 'Add VITE_CLAUDE_API_KEY to .env to enable AI hashtags.'}
+                </p>
+              </div>
             )}
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-3 pt-2">
-            <button
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium border rounded-md transition-all duration-150 hover:bg-[#f4f4f5]"
-              style={{ borderColor: '#e4e4e7', color: '#3f3f46' }}
-            >
-              <Save size={14} />
-              Save Draft
-            </button>
-            <button
+          <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
+            <GhostButton icon={<Save size={13} />}>Save Draft</GhostButton>
+            <PrimaryButton
               onClick={() => setActivePanel('schedule')}
               disabled={!caption.trim() || platforms.length === 0}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-md transition-all duration-150 hover:opacity-90 disabled:opacity-40"
-              style={{ backgroundColor: '#0a0a0a', color: '#ffffff' }}
+              icon={<ArrowRight size={13} />}
             >
               Move to Schedule
-              <ArrowRight size={14} />
-            </button>
+            </PrimaryButton>
           </div>
         </div>
 
         {/* Right — platforms + image */}
-        <div className="w-56 flex flex-col gap-6 flex-shrink-0">
+        <div style={{ width: 200, flexShrink: 0, display: 'flex', flexDirection: 'column' as const, gap: 24 }}>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#a1a1aa] mb-3">Platforms</p>
-            <div className="space-y-2">
-              {PLATFORM_OPTIONS.map(({ id, label }) => (
-                <label key={id} className="flex items-center gap-3 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={platforms.includes(id)}
-                    onChange={() => togglePlatform(id)}
-                    className="rounded"
-                    style={{ accentColor: '#0a0a0a' }}
-                  />
-                  <span className="text-sm text-[#3f3f46] group-hover:text-[#0a0a0a] transition-colors">{label}</span>
-                </label>
-              ))}
+            <FieldLabel>Post to</FieldLabel>
+            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+              {PLATFORM_OPTIONS.map(({ id, label }) => {
+                const checked = platforms.includes(id);
+                return (
+                  <label
+                    key={id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      cursor: 'pointer',
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      border: `1px solid ${checked ? 'var(--studio-ink)' : 'var(--studio-border)'}`,
+                      backgroundColor: checked ? '#fafaf9' : 'transparent',
+                      transition: 'all 0.12s',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: 4,
+                        border: `1.5px solid ${checked ? 'var(--studio-ink)' : 'var(--studio-border)'}`,
+                        backgroundColor: checked ? 'var(--studio-ink)' : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        transition: 'all 0.12s',
+                      }}
+                      onClick={() => togglePlatform(id)}
+                    >
+                      {checked && (
+                        <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                          <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </div>
+                    <span
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: checked ? 500 : 400,
+                        color: checked ? 'var(--studio-ink)' : 'var(--studio-ink-2)',
+                      }}
+                      onClick={() => togglePlatform(id)}
+                    >
+                      {label}
+                    </span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
           {currentPost.imagePreviewUrl && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#a1a1aa] mb-3">Image</p>
-              <img
-                src={currentPost.imagePreviewUrl}
-                alt="Post image"
-                className="w-full rounded-lg border border-[#e4e4e7] object-cover"
-                style={{ maxHeight: 160 }}
-              />
+              <FieldLabel>Attached Image</FieldLabel>
+              <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--studio-border)' }}>
+                <img
+                  src={currentPost.imagePreviewUrl}
+                  alt="Post"
+                  style={{ width: '100%', display: 'block', maxHeight: 160, objectFit: 'cover' }}
+                />
+              </div>
             </div>
           )}
         </div>

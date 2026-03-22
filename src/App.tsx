@@ -38,11 +38,15 @@ export default function App() {
 
   return (
     <AppContext.Provider value={{ currentPost, setCurrentPost, activePanel, setActivePanel, postizConnected }}>
-      <div className="flex min-h-screen" style={{ backgroundColor: '#fafaf9', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      <div className="flex min-h-screen" style={{ backgroundColor: 'var(--studio-bg)' }}>
         <Sidebar activePanel={activePanel} onNavigate={setActivePanel} />
         <main
-          className="flex-1 p-10"
-          style={{ marginLeft: 240, minHeight: '100vh' }}
+          style={{
+            marginLeft: 220,
+            minHeight: '100vh',
+            padding: '52px 56px',
+            flex: 1,
+          }}
         >
           {panels[activePanel]}
         </main>

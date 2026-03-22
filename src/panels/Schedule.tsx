@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
-import { CalendarDays, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
-import { PanelShell } from '../components/PanelShell';
+import { CalendarDays, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
+import { PanelShell, FieldLabel, PrimaryButton } from '../components/PanelShell';
 import { getChannels, getScheduledPosts, createPost } from '../lib/postiz';
 import type { PostizChannel, ScheduledPost } from '../types';
 import { AppContext } from '../App';
@@ -41,56 +41,95 @@ export function SchedulePanel() {
         publishDate: publishDate.toISOString(),
         channels: selectedChannels,
       });
-      setToast({ type: 'success', message: `Queued for ${format(publishDate, 'EEE d MMM')} at ${selectedTime} on ${selectedChannels.length} channel${selectedChannels.length > 1 ? 's' : ''}` });
-      const posts = await getScheduledPosts();
-      setScheduled(posts);
+      setToast({ type: 'success', message: `Queued · ${format(publishDate, 'EEE d MMM')} at ${selectedTime}` });
+      getScheduledPosts().then(setScheduled);
       setTimeout(() => setToast(null), 4000);
     } catch {
-      setToast({ type: 'error', message: 'Failed to queue post — check your Postiz connection.' });
+      setToast({ type: 'error', message: 'Failed to queue — check Postiz connection.' });
       setTimeout(() => setToast(null), 4000);
     } finally {
       setLoading(false);
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '9px 12px',
+    border: '1px solid var(--studio-border)',
+    borderRadius: 8,
+    fontSize: '13px',
+    color: 'var(--studio-ink)',
+    backgroundColor: 'var(--studio-panel)',
+    fontFamily: 'var(--studio-sans)',
+    outline: 'none',
+  };
+
   return (
-    <PanelShell title="Schedule" subtitle="Pick your channels and push to the Postiz queue.">
+    <PanelShell
+      eyebrow="Step 3 of 4"
+      title="Schedule"
+      subtitle="Choose your channels, pick date and time, push to Postiz."
+    >
       {!isConfigured.postiz && (
-        <div className="mb-6 px-4 py-3 rounded-md border border-amber-200 bg-amber-50 text-sm text-amber-700">
-          Postiz not configured — add <code className="font-mono text-xs">VITE_POSTIZ_URL</code> and <code className="font-mono text-xs">VITE_POSTIZ_API_KEY</code> to your <code className="font-mono text-xs">.env</code> file.
+        <div style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid #fde68a', backgroundColor: '#fffbeb', marginBottom: 24 }}>
+          <p style={{ fontSize: '13px', color: '#92400e' }}>
+            Postiz not configured — add <code style={{ fontFamily: 'monospace', fontSize: 11 }}>VITE_POSTIZ_URL</code> and <code style={{ fontFamily: 'monospace', fontSize: 11 }}>VITE_POSTIZ_API_KEY</code> to <code style={{ fontFamily: 'monospace', fontSize: 11 }}>.env</code>
+          </p>
         </div>
       )}
       {fetchError && (
-        <div className="mb-6 px-4 py-3 rounded-md border border-red-200 bg-red-50 text-sm text-red-600">{fetchError}</div>
+        <div style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid #fecaca', backgroundColor: '#fef2f2', marginBottom: 24 }}>
+          <p style={{ fontSize: '13px', color: '#b91c1c' }}>{fetchError}</p>
+        </div>
       )}
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-6 right-6 flex items-center gap-2 px-4 py-3 rounded-md shadow-lg text-sm font-medium z-50 ${toast.type === 'success' ? 'bg-[#0a0a0a] text-white' : 'bg-red-600 text-white'}`}>
+        <div style={{
+          position: 'fixed',
+          bottom: 28,
+          right: 28,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '12px 18px',
+          borderRadius: 10,
+          backgroundColor: toast.type === 'success' ? 'var(--studio-ink)' : '#dc2626',
+          color: '#fff',
+          fontSize: '13px',
+          fontWeight: 500,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+          zIndex: 50,
+        }}>
           {toast.type === 'success' ? <CheckCircle size={15} /> : <AlertCircle size={15} />}
           {toast.message}
         </div>
       )}
 
-      <div className="flex gap-8">
-        {/* Calendar */}
-        <div className="flex-1">
+      <div className="flex gap-10">
+        {/* Week calendar */}
+        <div style={{ flex: 1 }}>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#a1a1aa]">This Week</p>
-            <button onClick={() => getScheduledPosts().then(setScheduled)} className="text-[#a1a1aa] hover:text-[#0a0a0a] transition-colors">
+            <FieldLabel>This Week</FieldLabel>
+            <button
+              onClick={() => getScheduledPosts().then(setScheduled)}
+              style={{ color: 'var(--studio-ink-4)', cursor: 'pointer', display: 'flex' }}
+            >
               <RefreshCw size={13} />
             </button>
           </div>
-          <div className="border border-[#e4e4e7] rounded-lg overflow-hidden">
-            <div className="grid grid-cols-7 border-b border-[#e4e4e7]" style={{ backgroundColor: '#f4f4f5' }}>
+          <div style={{ border: '1px solid var(--studio-border)', borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', backgroundColor: 'var(--studio-sidebar)', borderBottom: '1px solid var(--studio-border)' }}>
               {weekDays.map((day) => (
-                <div key={day.toISOString()} className="px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-[#a1a1aa]">
-                  {format(day, 'EEE')}
-                  <div className="text-xs font-normal text-[#71717a] mt-0.5">{format(day, 'd')}</div>
+                <div key={day.toISOString()} style={{ padding: '10px 8px', textAlign: 'center' as const }}>
+                  <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'var(--studio-ink-4)', marginBottom: 2 }}>
+                    {format(day, 'EEE')}
+                  </p>
+                  <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--studio-ink-3)' }}>{format(day, 'd')}</p>
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-7 min-h-[120px]">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', minHeight: 100 }}>
               {weekDays.map((day) => {
                 const dayPosts = scheduled.filter((p) => {
                   try { return isSameDay(parseISO(p.publishDate), day); } catch { return false; }
@@ -100,11 +139,27 @@ export function SchedulePanel() {
                   <div
                     key={day.toISOString()}
                     onClick={() => setSelectedDate(day)}
-                    className="p-2 border-r border-[#f4f4f5] last:border-r-0 cursor-pointer transition-colors hover:bg-[#fafaf9]"
-                    style={{ backgroundColor: isSelected ? '#f0fdf0' : 'transparent' }}
+                    style={{
+                      padding: 8,
+                      borderRight: '1px solid var(--studio-border)',
+                      cursor: 'pointer',
+                      backgroundColor: isSelected ? '#f5fef0' : 'transparent',
+                      transition: 'background 0.1s',
+                    }}
                   >
                     {dayPosts.map((p) => (
-                      <div key={p.id} className="text-[10px] px-1.5 py-0.5 rounded mb-1 truncate" style={{ backgroundColor: '#dcfce7', color: '#15803d' }}>
+                      <div key={p.id} style={{
+                        fontSize: '10px',
+                        padding: '3px 6px',
+                        borderRadius: 5,
+                        backgroundColor: '#dcfce7',
+                        color: '#15803d',
+                        fontWeight: 600,
+                        marginBottom: 3,
+                        whiteSpace: 'nowrap' as const,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>
                         {format(parseISO(p.publishDate), 'HH:mm')}
                       </div>
                     ))}
@@ -115,64 +170,74 @@ export function SchedulePanel() {
           </div>
         </div>
 
-        {/* Scheduling form */}
-        <div className="w-64 flex-shrink-0 space-y-5">
-          {/* Post preview */}
+        {/* Right — form */}
+        <div style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column' as const, gap: 20 }}>
           {currentPost.caption && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-[#a1a1aa] mb-2">Post</p>
-              <div className="p-3 rounded-md border border-[#e4e4e7] bg-white text-xs text-[#3f3f46] leading-relaxed line-clamp-3">
+              <FieldLabel>Post Preview</FieldLabel>
+              <div style={{
+                padding: '12px 14px',
+                border: '1px solid var(--studio-border)',
+                borderRadius: 10,
+                backgroundColor: 'var(--studio-panel)',
+                fontSize: '13px',
+                color: 'var(--studio-ink-2)',
+                lineHeight: 1.55,
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical' as const,
+                overflow: 'hidden',
+              }}>
                 {currentPost.caption}
               </div>
             </div>
           )}
 
-          {/* Channels */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#a1a1aa] mb-2">Channels</p>
+            <FieldLabel>Channels</FieldLabel>
             {channels.length === 0 ? (
-              <p className="text-xs text-[#a1a1aa]">{isConfigured.postiz ? 'No channels found — connect them in Postiz.' : 'Connect Postiz to see channels.'}</p>
+              <p style={{ fontSize: '12px', color: 'var(--studio-ink-4)', lineHeight: 1.5 }}>
+                {isConfigured.postiz ? 'No channels found in Postiz.' : 'Connect Postiz to see channels.'}
+              </p>
             ) : (
-              <div className="space-y-2">
+              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 6 }}>
                 {channels.map((ch) => (
-                  <label key={ch.id} className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={selectedChannels.includes(ch.id)} onChange={() => toggleChannel(ch.id)} style={{ accentColor: '#0a0a0a' }} />
-                    <span className="text-sm text-[#3f3f46]">{ch.name}</span>
+                  <label key={ch.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={selectedChannels.includes(ch.id)} onChange={() => toggleChannel(ch.id)} style={{ accentColor: 'var(--studio-ink)' }} />
+                    <span style={{ fontSize: '13px', color: 'var(--studio-ink-2)' }}>{ch.name}</span>
                   </label>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Date & time */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#a1a1aa] mb-2">Date & Time</p>
-            <div className="space-y-2">
-              <input
-                type="date"
-                value={format(selectedDate, 'yyyy-MM-dd')}
-                onChange={(e) => setSelectedDate(new Date(e.target.value + 'T12:00:00'))}
-                className="w-full border border-[#e4e4e7] rounded-md px-3 py-2 text-sm text-[#0a0a0a] focus:outline-none focus:border-[#0a0a0a]"
-              />
-              <input
-                type="time"
-                value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
-                className="w-full border border-[#e4e4e7] rounded-md px-3 py-2 text-sm text-[#0a0a0a] focus:outline-none focus:border-[#0a0a0a]"
-              />
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+            <FieldLabel>Date & Time</FieldLabel>
+            <input
+              type="date"
+              value={format(selectedDate, 'yyyy-MM-dd')}
+              onChange={(e) => setSelectedDate(new Date(e.target.value + 'T12:00:00'))}
+              style={inputStyle}
+              onFocus={(e) => (e.target.style.borderColor = 'var(--studio-ink)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--studio-border)')}
+            />
+            <input
+              type="time"
+              value={selectedTime}
+              onChange={(e) => setSelectedTime(e.target.value)}
+              style={inputStyle}
+              onFocus={(e) => (e.target.style.borderColor = 'var(--studio-ink)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--studio-border)')}
+            />
           </div>
 
-          {/* Queue button */}
-          <button
+          <PrimaryButton
             onClick={handleQueue}
             disabled={loading || !currentPost.caption || selectedChannels.length === 0 || !isConfigured.postiz}
-            className="w-full py-2.5 text-sm font-semibold rounded-md transition-all duration-150 hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2"
-            style={{ backgroundColor: '#0a0a0a', color: '#ffffff' }}
+            icon={<CalendarDays size={14} />}
           >
-            <CalendarDays size={14} />
             {loading ? 'Queuing…' : 'Queue Post'}
-          </button>
+          </PrimaryButton>
         </div>
       </div>
     </PanelShell>
