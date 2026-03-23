@@ -6,6 +6,45 @@ A polished, self-hosted social media content dashboard called **"Studio"** — a
 
 ---
 
+## ⚠️ CORS — Read This First (Before Any API Work)
+
+**This project lost days to CORS. Do not repeat that.**
+
+Browsers block cross-origin requests. If Studio (e.g. `localhost:5173`) calls any local backend (e.g. Postiz on `localhost:4007`) directly, the browser will refuse the request with a CORS error — even though both are on localhost. The symptom is usually a connection dot showing red/offline, or a fetch that silently fails.
+
+**The fix is a Vite dev-server proxy. Set it up the moment you add any local API call.**
+
+In `vite.config.ts`, add a `server.proxy` block:
+
+```typescript
+server: {
+  proxy: {
+    '/postiz': {
+      target: 'http://localhost:4007',   // the local backend port
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/postiz/, ''),
+    },
+  },
+},
+```
+
+Then in your API client (`src/lib/postiz.ts` or equivalent), route all dev calls through the proxy prefix instead of the direct URL:
+
+```typescript
+function proxyUrl(path: string, directUrl: string): string {
+  if (import.meta.env.DEV) return `/postiz${path}`;   // Vite proxies this — no CORS
+  return `${directUrl}${path}`;                        // production: direct call
+}
+```
+
+**Rules:**
+- In dev mode (`import.meta.env.DEV`), always use the proxy prefix path, never the direct URL.
+- In production (built + served), use the direct URL — CORS doesn't apply when served from the same origin or via a reverse proxy.
+- The same pattern applies to any other local backend (Claude API proxy, Canva backend, etc.) — just add another proxy entry with a different prefix.
+- Check this is working before writing any UI that depends on API data. A quick `fetch('/postiz/api/auth/ping')` in the browser console confirms the proxy is live.
+
+---
+
 ## Design Direction
 
 This is the most important part. The design must feel like a **premium, contemporary tool** — think Linear, Vercel dashboard, or Raycast. Not the typical AI slop (no purple gradients, no rounded-everything, no Inter font wall-to-wall, no pastel card grids).
