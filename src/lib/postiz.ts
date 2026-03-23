@@ -1,14 +1,29 @@
-import { config } from '../config';
 import type { PostizChannel, ScheduledPost } from '../types';
+import { loadAccounts, loadActiveAccountId } from './accounts';
 
-const headers = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${config.postizApiKey}`,
-});
+// Always reads the active account's credentials from localStorage at call time
+function getActiveCredentials(): { url: string; apiKey: string } {
+  const accounts = loadAccounts();
+  const activeId = loadActiveAccountId();
+  const account = accounts.find(a => a.id === activeId) ?? accounts[0];
+  return {
+    url: account?.postizUrl?.replace(/\/$/, '') ?? '',
+    apiKey: account?.postizApiKey ?? '',
+  };
+}
+
+function headers(apiKey: string) {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${apiKey}`,
+  };
+}
 
 export async function pingPostiz(): Promise<boolean> {
+  const { url, apiKey } = getActiveCredentials();
+  if (!url || !apiKey) return false;
   try {
-    const res = await fetch(`${config.postizUrl}/api/auth/ping`, { headers: headers() });
+    const res = await fetch(`${url}/api/auth/ping`, { headers: headers(apiKey) });
     return res.ok;
   } catch {
     return false;
@@ -16,14 +31,16 @@ export async function pingPostiz(): Promise<boolean> {
 }
 
 export async function getChannels(): Promise<PostizChannel[]> {
-  const res = await fetch(`${config.postizUrl}/api/integrations`, { headers: headers() });
+  const { url, apiKey } = getActiveCredentials();
+  const res = await fetch(`${url}/api/integrations`, { headers: headers(apiKey) });
   if (!res.ok) throw new Error('Failed to fetch channels');
   const data = await res.json();
   return data.integrations || [];
 }
 
 export async function getScheduledPosts(): Promise<ScheduledPost[]> {
-  const res = await fetch(`${config.postizUrl}/api/posts?status=scheduled`, { headers: headers() });
+  const { url, apiKey } = getActiveCredentials();
+  const res = await fetch(`${url}/api/posts?status=scheduled`, { headers: headers(apiKey) });
   if (!res.ok) throw new Error('Failed to fetch posts');
   const data = await res.json();
   return data.posts || [];
@@ -35,14 +52,15 @@ export async function createPost(payload: {
   channels: string[];
   mediaUrls?: string[];
 }): Promise<{ id: string }> {
-  const res = await fetch(`${config.postizUrl}/api/posts`, {
+  const { url, apiKey } = getActiveCredentials();
+  const res = await fetch(`${url}/api/posts`, {
     method: 'POST',
-    headers: headers(),
+    headers: headers(apiKey),
     body: JSON.stringify({
       content: payload.content,
       date: payload.publishDate,
       settings: payload.channels.map((id) => ({ integration: { id } })),
-      ...(payload.mediaUrls?.length ? { media: payload.mediaUrls.map((url) => ({ url })) } : {}),
+      ...(payload.mediaUrls?.length ? { media: payload.mediaUrls.map((u) => ({ url: u })) } : {}),
     }),
   });
   if (!res.ok) throw new Error('Failed to create post');
