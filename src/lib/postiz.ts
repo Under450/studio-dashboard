@@ -1,7 +1,7 @@
 import type { PostizChannel, ScheduledPost } from '../types';
 import { loadAccounts, loadActiveAccountId } from './accounts';
 
-// Always reads the active account's credentials from localStorage at call time
+// Reads active account credentials from localStorage at call time
 function getActiveCredentials(): { url: string; apiKey: string } {
   const accounts = loadAccounts();
   const activeId = loadActiveAccountId();
@@ -10,6 +10,15 @@ function getActiveCredentials(): { url: string; apiKey: string } {
     url: account?.postizUrl?.replace(/\/$/, '') ?? '',
     apiKey: account?.postizApiKey ?? '',
   };
+}
+
+// In dev mode, route through Vite proxy to avoid CORS.
+// In production, use the stored URL directly.
+function proxyUrl(path: string, directUrl: string): string {
+  if (import.meta.env.DEV) {
+    return `/postiz${path}`;
+  }
+  return `${directUrl}${path}`;
 }
 
 function headers(apiKey: string) {
@@ -23,8 +32,12 @@ export async function pingPostiz(): Promise<boolean> {
   const { url, apiKey } = getActiveCredentials();
   if (!url || !apiKey) return false;
   try {
-    const res = await fetch(`${url}/api/auth/ping`, { headers: headers(apiKey) });
-    return res.ok;
+    // Try no-cors first — just check the server is reachable
+    const res = await fetch(proxyUrl('/api/auth/ping', url), {
+      headers: headers(apiKey),
+    });
+    // Any response (even 404) means server is up
+    return res.status < 500;
   } catch {
     return false;
   }
@@ -32,7 +45,7 @@ export async function pingPostiz(): Promise<boolean> {
 
 export async function getChannels(): Promise<PostizChannel[]> {
   const { url, apiKey } = getActiveCredentials();
-  const res = await fetch(`${url}/api/integrations`, { headers: headers(apiKey) });
+  const res = await fetch(proxyUrl('/api/integrations', url), { headers: headers(apiKey) });
   if (!res.ok) throw new Error('Failed to fetch channels');
   const data = await res.json();
   return data.integrations || [];
@@ -40,7 +53,7 @@ export async function getChannels(): Promise<PostizChannel[]> {
 
 export async function getScheduledPosts(): Promise<ScheduledPost[]> {
   const { url, apiKey } = getActiveCredentials();
-  const res = await fetch(`${url}/api/posts?status=scheduled`, { headers: headers(apiKey) });
+  const res = await fetch(proxyUrl('/api/posts?status=scheduled', url), { headers: headers(apiKey) });
   if (!res.ok) throw new Error('Failed to fetch posts');
   const data = await res.json();
   return data.posts || [];
@@ -53,7 +66,7 @@ export async function createPost(payload: {
   mediaUrls?: string[];
 }): Promise<{ id: string }> {
   const { url, apiKey } = getActiveCredentials();
-  const res = await fetch(`${url}/api/posts`, {
+  const res = await fetch(proxyUrl('/api/posts', url), {
     method: 'POST',
     headers: headers(apiKey),
     body: JSON.stringify({

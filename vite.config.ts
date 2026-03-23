@@ -10,4 +10,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/postiz': {
+        target: 'http://localhost:4007',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/postiz/, ''),
+      },
+    },
+  },
 });
