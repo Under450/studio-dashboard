@@ -10,7 +10,6 @@ import {
   loadAccounts, loadActiveAccountId, saveAccounts,
   saveActiveAccountId, createAccount,
 } from './lib/accounts';
-import { pingPostiz } from './lib/postiz';
 
 const defaultPost: PostDraft = { caption: '', platforms: [], hashtags: [] };
 
@@ -19,7 +18,7 @@ export const AppContext = createContext<AppContextType>({
   setCurrentPost: () => {},
   activePanel: 'create-image',
   setActivePanel: () => {},
-  postizConnected: false,
+
   activeAccount: null,
   accounts: [],
   setActiveAccount: () => {},
@@ -33,7 +32,7 @@ export function useApp() {
 export default function App() {
   const [currentPost, setCurrentPost] = useState<PostDraft>(defaultPost);
   const [activePanel, setActivePanel] = useState<PanelId>('create-image');
-  const [postizConnected, setPostizConnected] = useState(false);
+
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [activeAccount, setActiveAccountState] = useState<Account | null>(null);
   const [accountManagerOpen, setAccountManagerOpen] = useState(false);
@@ -57,10 +56,6 @@ export default function App() {
     }
   }, []);
 
-  // Check Postiz connection on mount and when active account changes
-  useEffect(() => {
-    pingPostiz().then(setPostizConnected).catch(() => setPostizConnected(false));
-  }, [activeAccount?.id]);
 
   const setActiveAccount = (account: Account) => {
     setActiveAccountState(account);
@@ -86,7 +81,7 @@ export default function App() {
     <AppContext.Provider value={{
       currentPost, setCurrentPost,
       activePanel, setActivePanel,
-      postizConnected,
+
       activeAccount, accounts,
       setActiveAccount,
       openAccountManager: () => setAccountManagerOpen(true),

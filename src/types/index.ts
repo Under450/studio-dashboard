@@ -17,6 +17,7 @@ export interface ScheduledPost {
   status: 'scheduled' | 'published' | 'failed';
 }
 
+/** @deprecated Postiz integration removed — kept for compatibility */
 export interface PostizChannel {
   id: string;
   name: string;
@@ -38,7 +39,7 @@ export interface AppContextType {
   setCurrentPost: (post: PostDraft) => void;
   activePanel: PanelId;
   setActivePanel: (panel: PanelId) => void;
-  postizConnected: boolean;
+
   activeAccount: Account | null;
   accounts: Account[];
   setActiveAccount: (account: Account) => void;

@@ -12,6 +12,7 @@ interface AccountManagerProps {
 }
 
 const emptyForm = { name: '', postizUrl: '', postizApiKey: '', claudeApiKey: '' };
+// Note: postizUrl and postizApiKey kept in form for account structure compatibility but fields are hidden
 
 export function AccountManager({ accounts, activeAccount, onClose, onAccountsChange, onActiveChange }: AccountManagerProps) {
   const [form, setForm] = useState(emptyForm);
@@ -261,8 +262,6 @@ export function AccountManager({ accounts, activeAccount, onClose, onAccountsCha
                           backgroundColor: 'var(--studio-bg)',
                         }}>
                           {[
-                            { label: 'Postiz URL', value: account.postizUrl || '—' },
-                            { label: 'Postiz API Key', value: account.postizApiKey ? '••••••••' + account.postizApiKey.slice(-4) : '—' },
                             { label: 'Claude API Key', value: account.claudeApiKey ? '••••••••' + account.claudeApiKey.slice(-4) : '—' },
                           ].map(({ label, value }) => (
                             <div key={label} style={{ display: 'flex', gap: 8, marginBottom: 5 }}>
@@ -303,27 +302,16 @@ export function AccountManager({ accounts, activeAccount, onClose, onAccountsCha
                 {errors.name && <p style={{ fontSize: '11px', color: '#ef4444', marginTop: 4 }}>{errors.name}</p>}
               </div>
 
-              {/* Postiz URL */}
-              <div>
-                <label style={labelStyle}>Postiz URL</label>
-                <input
-                  value={form.postizUrl}
-                  onChange={e => setForm(f => ({ ...f, postizUrl: e.target.value }))}
-                  placeholder="http://localhost:3000"
-                  style={inputStyle}
-                />
-              </div>
-
-              {/* Postiz API Key */}
-              <div>
-                <label style={labelStyle}>Postiz API Key</label>
-                <input
-                  type="password"
-                  value={form.postizApiKey}
-                  onChange={e => setForm(f => ({ ...f, postizApiKey: e.target.value }))}
-                  placeholder="Paste your Postiz key"
-                  style={inputStyle}
-                />
+              {/* Social platforms note */}
+              <div style={{
+                padding: '10px 14px',
+                borderRadius: 8,
+                backgroundColor: 'var(--studio-panel)',
+                border: '1px solid var(--studio-border-light)',
+              }}>
+                <p style={{ fontSize: '12px', color: 'var(--studio-ink-3)', lineHeight: 1.5 }}>
+                  Social platform connections coming soon.
+                </p>
               </div>
 
               {/* Claude API Key */}
