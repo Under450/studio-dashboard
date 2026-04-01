@@ -10,6 +10,7 @@ import {
   loadAccounts, loadActiveAccountId, saveAccounts,
   saveActiveAccountId, createAccount,
 } from './lib/accounts';
+import { pingPostiz } from './lib/postiz';
 
 const defaultPost: PostDraft = { caption: '', platforms: [], hashtags: [] };
 
@@ -32,7 +33,7 @@ export function useApp() {
 export default function App() {
   const [currentPost, setCurrentPost] = useState<PostDraft>(defaultPost);
   const [activePanel, setActivePanel] = useState<PanelId>('create-image');
-  const [postizConnected] = useState(false);
+  const [postizConnected, setPostizConnected] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [activeAccount, setActiveAccountState] = useState<Account | null>(null);
   const [accountManagerOpen, setAccountManagerOpen] = useState(false);
@@ -55,6 +56,11 @@ export default function App() {
       setActiveAccountState(found);
     }
   }, []);
+
+  // Check Postiz connection on mount and when active account changes
+  useEffect(() => {
+    pingPostiz().then(setPostizConnected).catch(() => setPostizConnected(false));
+  }, [activeAccount?.id]);
 
   const setActiveAccount = (account: Account) => {
     setActiveAccountState(account);

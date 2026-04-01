@@ -1,11 +1,22 @@
 import { config } from '../config';
+import { loadAccounts, loadActiveAccountId } from './accounts';
+
+function getActiveAccount() {
+  const accounts = loadAccounts();
+  const activeId = loadActiveAccountId();
+  return accounts.find(a => a.id === activeId) ?? accounts[0] ?? null;
+}
 
 async function callClaude(messages: { role: string; content: string }[], system: string): Promise<string> {
+  const activeAccount = getActiveAccount();
+  const apiKey = activeAccount?.claudeApiKey || config.claudeApiKey;
+  if (!apiKey) throw new Error('No Claude API key configured. Add one in Account settings or .env');
+
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': config.claudeApiKey,
+      'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true',
     },

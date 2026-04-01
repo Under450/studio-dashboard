@@ -1,7 +1,8 @@
 import { useState, useCallback, useContext } from 'react';
-import { ArrowUpRight, CloudUpload, X, CheckCircle2 } from 'lucide-react';
+import { ArrowUpRight, CloudUpload, X, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
 import { PanelShell, FieldLabel, PrimaryButton, GhostButton } from '../components/PanelShell';
 import { openCanva, getDimensions, PLATFORM_DIMENSIONS } from '../lib/canva';
+import { generateImage } from '../lib/imageGen';
 import type { Platform } from '../types';
 import { AppContext } from '../App';
 
@@ -17,6 +18,9 @@ export function CreateImagePanel() {
   const { currentPost, setCurrentPost, setActivePanel } = useContext(AppContext);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>('instagram-post');
   const [dragging, setDragging] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   const dims = getDimensions(selectedPlatform);
 
@@ -30,6 +34,20 @@ export function CreateImagePanel() {
     },
     [currentPost, setCurrentPost]
   );
+
+  const handleGenerateImage = async () => {
+    if (!aiPrompt.trim()) return;
+    setAiLoading(true);
+    setAiError('');
+    try {
+      const dataUrl = await generateImage(aiPrompt);
+      setCurrentPost({ ...currentPost, imagePreviewUrl: dataUrl, imageFile: undefined });
+    } catch (err: unknown) {
+      setAiError(err instanceof Error ? err.message : 'Image generation failed');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,6 +144,71 @@ export function CreateImagePanel() {
               </div>
               <PrimaryButton onClick={() => openCanva(selectedPlatform)} icon={<ArrowUpRight size={14} />}>
                 Open in Canva
+              </PrimaryButton>
+            </div>
+          </div>
+
+          {/* AI Image Generation */}
+          <div>
+            <FieldLabel>Generate with AI</FieldLabel>
+            <div
+              style={{
+                padding: '20px 24px',
+                backgroundColor: 'var(--studio-panel)',
+                border: '1px solid var(--studio-border)',
+                borderRadius: 12,
+              }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--studio-ink)', marginBottom: 2 }}>AI Image Generator</p>
+                  <p style={{ fontSize: '12px', color: 'var(--studio-ink-3)' }}>Describe the image you want to create</p>
+                </div>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    backgroundColor: '#2563EB',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Sparkles size={16} color="#fff" />
+                </div>
+              </div>
+              <textarea
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="A professional flat-lay photo of a coffee cup on a marble desk with golden light..."
+                style={{
+                  width: '100%',
+                  minHeight: 80,
+                  padding: '12px',
+                  border: '1px solid var(--studio-border)',
+                  borderRadius: 8,
+                  fontSize: '13px',
+                  lineHeight: 1.55,
+                  color: 'var(--studio-ink)',
+                  backgroundColor: '#fdfcfa',
+                  fontFamily: 'var(--studio-sans)',
+                  outline: 'none',
+                  marginBottom: 10,
+                  transition: 'border-color 0.15s',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = 'var(--studio-ink)')}
+                onBlur={(e) => (e.target.style.borderColor = 'var(--studio-border)')}
+              />
+              {aiError && (
+                <p style={{ fontSize: '12px', color: '#ef4444', marginBottom: 8 }}>{aiError}</p>
+              )}
+              <PrimaryButton
+                onClick={handleGenerateImage}
+                disabled={aiLoading || !aiPrompt.trim()}
+                icon={aiLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+              >
+                {aiLoading ? 'Generating...' : 'Generate Image'}
               </PrimaryButton>
             </div>
           </div>

@@ -32,12 +32,17 @@ export async function pingPostiz(): Promise<boolean> {
   const { url, apiKey } = getActiveCredentials();
   if (!url || !apiKey) return false;
   try {
-    // Try no-cors first — just check the server is reachable
     const res = await fetch(proxyUrl('/api/auth/ping', url), {
       headers: headers(apiKey),
     });
-    // Any response (even 404) means server is up
-    return res.status < 500;
+    if (res.status !== 200) return false;
+    // Verify it returns valid JSON
+    try {
+      await res.json();
+      return true;
+    } catch {
+      return false;
+    }
   } catch {
     return false;
   }

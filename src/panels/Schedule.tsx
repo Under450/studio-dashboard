@@ -4,11 +4,15 @@ import { PanelShell, FieldLabel, PrimaryButton } from '../components/PanelShell'
 import { getChannels, getScheduledPosts, createPost } from '../lib/postiz';
 import type { PostizChannel, ScheduledPost } from '../types';
 import { AppContext } from '../App';
-import { isConfigured } from '../config';
+import { loadAccounts, loadActiveAccountId } from '../lib/accounts';
 import { format, addDays, startOfWeek, isSameDay, parseISO } from 'date-fns';
 
 export function SchedulePanel() {
   const { currentPost } = useContext(AppContext);
+  const accounts = loadAccounts();
+  const activeId = loadActiveAccountId();
+  const account = accounts.find(a => a.id === activeId) ?? accounts[0] ?? null;
+  const hasPostiz = !!(account?.postizUrl && account?.postizApiKey);
   const [channels, setChannels] = useState<PostizChannel[]>([]);
   const [scheduled, setScheduled] = useState<ScheduledPost[]>([]);
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
@@ -22,7 +26,7 @@ export function SchedulePanel() {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   useEffect(() => {
-    if (!isConfigured.postiz) return;
+    if (!hasPostiz) return;
     Promise.all([getChannels(), getScheduledPosts()])
       .then(([ch, posts]) => { setChannels(ch); setScheduled(posts); })
       .catch(() => setFetchError('Could not reach Postiz — check VITE_POSTIZ_URL in .env'));
@@ -70,7 +74,7 @@ export function SchedulePanel() {
       title="Schedule"
       subtitle="Choose your channels, pick date and time, push to Postiz."
     >
-      {!isConfigured.postiz && (
+      {!hasPostiz && (
         <div style={{ padding: '12px 16px', borderRadius: 8, border: '1px solid #fde68a', backgroundColor: '#fffbeb', marginBottom: 24 }}>
           <p style={{ fontSize: '13px', color: '#92400e' }}>
             Postiz not configured — add <code style={{ fontFamily: 'monospace', fontSize: 11 }}>VITE_POSTIZ_URL</code> and <code style={{ fontFamily: 'monospace', fontSize: 11 }}>VITE_POSTIZ_API_KEY</code> to <code style={{ fontFamily: 'monospace', fontSize: 11 }}>.env</code>
@@ -197,7 +201,7 @@ export function SchedulePanel() {
             <FieldLabel>Channels</FieldLabel>
             {channels.length === 0 ? (
               <p style={{ fontSize: '12px', color: 'var(--studio-ink-4)', lineHeight: 1.5 }}>
-                {isConfigured.postiz ? 'No channels found in Postiz.' : 'Connect Postiz to see channels.'}
+                {hasPostiz ? 'No channels found in Postiz.' : 'Connect Postiz to see channels.'}
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 6 }}>
@@ -233,7 +237,7 @@ export function SchedulePanel() {
 
           <PrimaryButton
             onClick={handleQueue}
-            disabled={loading || !currentPost.caption || selectedChannels.length === 0 || !isConfigured.postiz}
+            disabled={loading || !currentPost.caption || selectedChannels.length === 0 || !hasPostiz}
             icon={<CalendarDays size={14} />}
           >
             {loading ? 'Queuing…' : 'Queue Post'}
